@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  <!-- Header -->
+  <div class="backdrop-blur-lg bg-white/5 border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-6 py-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Tableau des Utilisateurs</h1>
+        <p class="text-slate-300 mt-2" *ngIf="currentUser">
+          Bienvenue, <span class="text-blue-400 font-semibold">{{ currentUser.prenom }} {{ currentUser.nom }}</span>
+        </p>
+      </div>
+      <button
+        (click)="logout()"
+        class="px-6 py-2 bg-red-500/20 border border-red-500/50 text-red-300 rounded-lg hover:bg-red-500/30 transition"
+      >
+        Déconnexion
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-6xl mx-auto px-6 py-8">
+    <!-- Table Card -->
+    <div class="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+      <!-- Table Header -->
+      <div class="grid grid-cols-4 gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="font-semibold text-slate-200">Email</div>
+        <div class="font-semibold text-slate-200">Prénom</div>
+        <div class="font-semibold text-slate-200">Nom</div>
+        <div class="font-semibold text-slate-200">ID</div>
+      </div>
+
+      <!-- Table Body -->
+      <div>
+        <div
+          *ngFor="let user of users; let i = index"
+          class="grid grid-cols-4 gap-4 p-6 border-b border-white/5 hover:bg-white/5 transition"
+          [class.bg-blue-500/10]="currentUser?.email === user.email"
+        >
+          <div class="text-slate-300">
+            <span *ngIf="currentUser?.email === user.email" class="text-blue-400 font-semibold">✓ </span>
+            {{ user.email }}
+          </div>
+          <div class="text-slate-300">{{ user.prenom }}</div>
+          <div class="text-slate-300">{{ user.nom }}</div>
+          <div class="text-slate-400 text-sm">{{ user.id }}</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="p-6 bg-white/5 border-t border-white/10">
+        <p class="text-slate-300">
+          <span class="font-semibold text-blue-400">{{ users.length }}</span> utilisateurs dans la base de données
+        </p>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="mt-8 backdrop-blur-lg bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-6">
+      <p class="text-cyan-200">
+        💡 Vous êtes connecté en tant que <span class="font-semibold">{{ currentUser?.email }}</span>
+      </p>
+    </div>
+  </div>
+</div>

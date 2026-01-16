@@ -1,0 +1,457 @@
+<div class="p-6">
+  <!-- Page Subtitle -->
+  <div class="mb-4">
+    <p class="text-gray-500 text-xs sm:text-sm">Gérez les utilisateurs de la plateforme</p>
+  </div>
+
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Gestion des Utilisateurs</h1>
+    <div class="flex flex-wrap gap-3">
+      <button
+        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-600 text-white text-sm font-medium rounded-xl hover:bg-gray-700 transition-colors"
+        (click)="openImportModal()"
+      >
+        <app-icon name="fileText" [size]="18"></app-icon>
+        Importer Excel
+      </button>
+      <button
+        class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
+        (click)="openForm()"
+      >
+        <app-icon name="plus" [size]="18"></app-icon>
+        Nouvel Utilisateur
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger mb-6">
+    <p class="flex-1">{{ error }}</p>
+    <button class="text-red-600 hover:text-red-800 transition-colors" (click)="error = null">
+      <app-icon name="x" [size]="18"></app-icon>
+    </button>
+  </div>
+
+  <!-- Tabs for filtering by role -->
+  <div class="mb-6">
+    <div class="flex gap-2 border-b border-gray-200">
+      <button
+        class="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all"
+        [class.border-b-2]="activeTab === 'students'"
+        [class.border-blue-500]="activeTab === 'students'"
+        [class.text-blue-600]="activeTab === 'students'"
+        [class.text-gray-500]="activeTab !== 'students'"
+        (click)="activeTab = 'students'; searchRole = 'ETUDIANT'"
+      >
+        <app-icon name="users" [size]="18"></app-icon>
+        Étudiants ({{ getFilteredUsers('ETUDIANT').length }})
+      </button>
+      <button
+        class="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all"
+        [class.border-b-2]="activeTab === 'teachers'"
+        [class.border-blue-500]="activeTab === 'teachers'"
+        [class.text-blue-600]="activeTab === 'teachers'"
+        [class.text-gray-500]="activeTab !== 'teachers'"
+        (click)="activeTab = 'teachers'; searchRole = 'ENSEIGNANT'"
+      >
+        <app-icon name="briefcase" [size]="18"></app-icon>
+        Enseignants ({{ getFilteredUsers('ENSEIGNANT').length }})
+      </button>
+      <button
+        class="inline-flex items-center gap-2 px-6 py-3 font-medium transition-all"
+        [class.border-b-2]="activeTab === 'all'"
+        [class.border-blue-500]="activeTab === 'all'"
+        [class.text-blue-600]="activeTab === 'all'"
+        [class.text-gray-500]="activeTab !== 'all'"
+        (click)="activeTab = 'all'; searchRole = ''"
+      >
+        <app-icon name="clipboardList" [size]="18"></app-icon>
+        Tous ({{ users.length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Filters -->
+  <div class="card mb-6">
+    <div class="p-4 border-b border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <app-icon name="search" [size]="20" class="text-gray-600"></app-icon>
+        Recherche
+      </h3>
+    </div>
+    <div class="p-4">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">Rechercher par nom</label>
+        <input
+          type="text"
+          class="input"
+          placeholder="Rechercher par nom..."
+          [(ngModel)]="searchNom"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+    <div class="spinner"></div>
+    <p class="mt-4 text-gray-500">Chargement des utilisateurs...</p>
+  </div>
+
+  <!-- Form Modal -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="card w-full max-w-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
+      <div
+        class="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white"
+      >
+        <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
+          <app-icon
+            [name]="editingId ? 'fileEdit' : 'userCheck'"
+            [size]="20"
+            class="text-blue-600"
+          ></app-icon>
+          {{ editingId ? 'Modifier un utilisateur' : 'Créer un nouvel utilisateur' }}
+        </h2>
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+          (click)="closeForm()"
+        >
+          <app-icon name="x" [size]="20"></app-icon>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label for="nom" class="block text-sm font-medium text-gray-700">Nom *</label>
+            <input
+              type="text"
+              class="input"
+              id="nom"
+              [(ngModel)]="formData.nom"
+              placeholder="Nom"
+            />
+          </div>
+          <div class="space-y-2">
+            <label for="prenom" class="block text-sm font-medium text-gray-700">Prénom *</label>
+            <input
+              type="text"
+              class="input"
+              id="prenom"
+              [(ngModel)]="formData.prenom"
+              placeholder="Prénom"
+            />
+          </div>
+        </div>
+        <div class="space-y-2">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
+          <input
+            type="email"
+            class="input"
+            id="email"
+            [(ngModel)]="formData.email"
+            placeholder="example&#64;example.com"
+          />
+        </div>
+        <div *ngIf="!editingId" class="space-y-2">
+          <label for="password" class="block text-sm font-medium text-gray-700"
+            >Mot de passe *</label
+          >
+          <input
+            type="password"
+            class="input"
+            id="password"
+            [(ngModel)]="formData.motDePasse"
+            placeholder="Mot de passe"
+          />
+        </div>
+        <div class="space-y-2">
+          <label for="role" class="block text-sm font-medium text-gray-700">Rôle *</label>
+          <select class="input" id="role" [(ngModel)]="formData.role">
+            <option value="ETUDIANT">Étudiant</option>
+            <option value="ENSEIGNANT">Enseignant</option>
+            <option value="SOUS_ADMIN">Sous-Administrateur</option>
+            <option value="ADMIN">Administrateur</option>
+          </select>
+        </div>
+        <!-- Filière pour ETUDIANT et ENSEIGNANT -->
+        <div
+          *ngIf="formData.role === 'ETUDIANT' || formData.role === 'ENSEIGNANT'"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          <div class="space-y-2">
+            <label for="filiere" class="block text-sm font-medium text-gray-700">
+              Filière <span class="text-red-500">*</span>
+            </label>
+            <select class="input" id="filiere" [(ngModel)]="formData.filiereId" required>
+              <option [ngValue]="null">Sélectionner une filière</option>
+              <option *ngFor="let f of filieres" [ngValue]="f.id">{{ f.nom }}</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+              <app-icon
+                [name]="formData.role === 'ENSEIGNANT' ? 'bookOpen' : 'graduationCap'"
+                [size]="14"
+              ></app-icon>
+              {{
+                formData.role === 'ENSEIGNANT'
+                  ? 'Filière encadrée par cet enseignant'
+                  : "Filière de l'étudiant"
+              }}
+            </p>
+          </div>
+          <!-- Année uniquement pour les étudiants -->
+          <div *ngIf="formData.role === 'ETUDIANT'" class="space-y-2">
+            <label for="annee" class="block text-sm font-medium text-gray-700">Année</label>
+            <select class="input" id="annee" [(ngModel)]="formData.annee">
+              <option value="">Sélectionner une année</option>
+              <option value="M1">M1</option>
+              <option value="M2">M2</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end gap-3 sticky bottom-0 bg-white">
+        <button class="btn btn-ghost" (click)="closeForm()">Annuler</button>
+        <button class="btn btn-primary" (click)="saveUser()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div *ngIf="!isLoading && filteredUsers.length > 0" class="card">
+    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <app-icon name="users" [size]="20" class="text-gray-600"></app-icon>
+        Liste des Utilisateurs
+      </h3>
+      <span class="badge badge-primary">{{ filteredUsers.length }} utilisateur(s)</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Nom
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Prénom
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Email
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Rôle
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Filière
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Année
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Statut
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let user of filteredUsers" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+              <strong class="text-gray-800">{{ user.nom }}</strong>
+            </td>
+            <td class="px-6 py-4 text-gray-600">{{ user.prenom }}</td>
+            <td class="px-6 py-4 text-gray-600">{{ user.email }}</td>
+            <td class="px-6 py-4">
+              <span
+                class="px-3 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-purple-100 text-purple-700': user.role === 'ADMIN',
+                  'bg-blue-100 text-blue-700': user.role === 'SOUS_ADMIN',
+                  'bg-green-100 text-green-700': user.role === 'ENSEIGNANT',
+                  'bg-yellow-100 text-yellow-700': user.role === 'ETUDIANT'
+                }"
+              >
+                {{ getRoleLabel(user.role) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-gray-600">{{ user.filiereId ? 'Oui' : '-' }}</td>
+            <td class="px-6 py-4 text-gray-600">{{ user.annee || '-' }}</td>
+            <td class="px-6 py-4">
+              <span
+                *ngIf="!isAdminRole(user)"
+                class="px-3 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-700': user.actif !== false,
+                  'bg-red-100 text-red-700': user.actif === false
+                }"
+              >
+                {{ user.actif === false ? 'Bloqué' : 'Actif' }}
+              </span>
+              <span *ngIf="isAdminRole(user)" class="text-gray-400 text-sm">-</span>
+            </td>
+            <td class="px-6 py-4">
+              <!-- Pas de boutons pour les admins -->
+              <div *ngIf="!isAdminRole(user)" class="flex items-center gap-2">
+                <button
+                  class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                  (click)="openForm(user)"
+                  title="Modifier"
+                >
+                  <app-icon name="fileEdit" [size]="16"></app-icon>
+                </button>
+                <button
+                  class="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
+                  [ngClass]="{
+                    'bg-orange-50 text-orange-600 hover:bg-orange-100': user.actif !== false,
+                    'bg-green-50 text-green-600 hover:bg-green-100': user.actif === false
+                  }"
+                  (click)="toggleUserStatus(user)"
+                  [title]="user.actif === false ? 'Débloquer' : 'Bloquer'"
+                >
+                  <app-icon
+                    [name]="user.actif === false ? 'checkCircle' : 'xCircle'"
+                    [size]="16"
+                  ></app-icon>
+                </button>
+              </div>
+              <!-- Message pour les admins -->
+              <span *ngIf="isAdminRole(user)" class="text-gray-400 text-xs italic">
+                Modifier via Mon Profil
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredUsers.length === 0" class="card p-12 text-center">
+    <div class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+      <app-icon name="user" [size]="32" class="text-gray-400"></app-icon>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-800 mb-2">Aucun utilisateur trouvé</h3>
+    <p class="text-gray-500">Aucun utilisateur ne correspond à vos critères de recherche.</p>
+  </div>
+
+  <!-- Import Modal -->
+  <div
+    *ngIf="showImportModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+  >
+    <div class="card w-full max-w-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-800">
+          📥 Importer des utilisateurs depuis Excel
+        </h2>
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+          (click)="closeImportModal()"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="p-6 space-y-6">
+        <!-- Instructions -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <h4 class="font-semibold text-blue-800 mb-2">📋 Format du fichier Excel attendu :</h4>
+          <p class="text-blue-700 text-sm mb-3">
+            Le fichier doit contenir les colonnes suivantes (dans cet ordre) :
+          </p>
+          <ol class="list-decimal list-inside text-sm text-blue-700 space-y-1">
+            <li><strong>Nom</strong> - Nom de l'utilisateur</li>
+            <li><strong>Prénom</strong> - Prénom de l'utilisateur</li>
+            <li><strong>Email</strong> - Adresse email (unique)</li>
+            <li><strong>MotDePasse</strong> - Mot de passe initial</li>
+            <li><strong>Role</strong> - ADMIN, ENSEIGNANT ou ETUDIANT</li>
+            <li><strong>FiliereId</strong> - ID de la filière (optionnel)</li>
+            <li><strong>Annee</strong> - M1 ou M2 (optionnel)</li>
+          </ol>
+          <button
+            class="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+            (click)="downloadTemplate()"
+          >
+            📄 Télécharger le template CSV
+          </button>
+        </div>
+
+        <!-- File Input -->
+        <div class="space-y-2">
+          <label for="fileInput" class="block text-sm font-medium text-gray-700">
+            Sélectionner un fichier Excel (.xlsx ou .xls)
+          </label>
+          <input
+            type="file"
+            id="fileInput"
+            #fileInput
+            class="input"
+            accept=".xlsx,.xls"
+            (change)="onFileSelected($event)"
+          />
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="importLoading" class="flex flex-col items-center justify-center py-8">
+          <div class="spinner"></div>
+          <p class="mt-4 text-gray-500">Import en cours...</p>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="error" class="alert alert-danger">
+          <p>{{ error }}</p>
+        </div>
+
+        <!-- Import Result -->
+        <div *ngIf="importResult" class="space-y-4">
+          <h4 class="font-semibold text-gray-800">📊 Résultat de l'import :</h4>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="card p-4 text-center border-l-4 border-green-500">
+              <span class="text-2xl font-bold text-green-600">{{ importResult.succes }}</span>
+              <span class="block text-sm text-gray-500">Succès</span>
+            </div>
+            <div class="card p-4 text-center border-l-4 border-red-500">
+              <span class="text-2xl font-bold text-red-600">{{ importResult.erreurs }}</span>
+              <span class="block text-sm text-gray-500">Erreurs</span>
+            </div>
+            <div class="card p-4 text-center border-l-4 border-blue-500">
+              <span class="text-2xl font-bold text-blue-600">{{ importResult.totalTraite }}</span>
+              <span class="block text-sm text-gray-500">Total traité</span>
+            </div>
+          </div>
+
+          <!-- Errors Details -->
+          <div
+            *ngIf="importResult.detailsErreurs && importResult.detailsErreurs.length > 0"
+            class="bg-red-50 border border-red-200 rounded-xl p-4"
+          >
+            <h5 class="font-semibold text-red-800 mb-2">⚠️ Détails des erreurs :</h5>
+            <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+              <li *ngFor="let err of importResult.detailsErreurs">{{ err }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end">
+        <button class="btn btn-secondary" (click)="closeImportModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>

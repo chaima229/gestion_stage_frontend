@@ -1,0 +1,202 @@
+<div class="p-6">
+  <!-- Page Subtitle -->
+  <div class="mb-6">
+    <p class="text-gray-500 text-sm">Voici un aperçu de vos stages à encadrer</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+    <div class="spinner"></div>
+    <p class="mt-4 text-gray-500">Chargement des statistiques...</p>
+  </div>
+
+  <!-- Error State -->
+  <div
+    *ngIf="error && !isLoading"
+    class="bg-red-50 border border-red-200 rounded-xl p-6 text-center"
+  >
+    <p class="text-red-600 mb-4">{{ error }}</p>
+    <button class="btn btn-danger" (click)="loadStatistics()">Réessayer</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="statistics && !isLoading">
+    <!-- Primary Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- À Valider Card -->
+      <div
+        class="card group hover:shadow-lg transition-all duration-300 border-l-4 border-yellow-500"
+      >
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-500">À Valider</span>
+            <div
+              class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center text-xl"
+            >
+              ⏳
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-800 mb-1">
+            {{ statistics.totalStagesToValidate }}
+          </h3>
+          <span class="text-sm text-gray-400">Stages en attente</span>
+        </div>
+      </div>
+
+      <!-- Validés Card -->
+      <div
+        class="card group hover:shadow-lg transition-all duration-300 border-l-4 border-green-500"
+      >
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-500">Validés</span>
+            <div
+              class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-xl text-green-600"
+            >
+              ✓
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ statistics.stagesValidated }}</h3>
+          <span class="text-sm text-gray-400">Stages approuvés</span>
+        </div>
+      </div>
+
+      <!-- Refusés Card -->
+      <div class="card group hover:shadow-lg transition-all duration-300 border-l-4 border-red-500">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-500">Refusés</span>
+            <div
+              class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center text-xl text-red-600"
+            >
+              ✕
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ statistics.stagesRefused }}</h3>
+          <span class="text-sm text-gray-400">Stages refusés</span>
+        </div>
+      </div>
+
+      <!-- Étudiants Card -->
+      <div
+        class="card group hover:shadow-lg transition-all duration-300 border-l-4 border-blue-500"
+      >
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-medium text-gray-500">Étudiants</span>
+            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-xl">
+              👥
+            </div>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-800 mb-1">{{ statistics.totalStudents }}</h3>
+          <span class="text-sm text-gray-400">Sous votre supervision</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="card p-4 flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-xl"
+        >
+          📊
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-gray-500">Total Stages</h4>
+          <p class="text-2xl font-bold text-gray-800">{{ getTotalStages() }}</p>
+          <small class="text-xs text-gray-400">Tous états confondus</small>
+        </div>
+      </div>
+
+      <div class="card p-4 flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white text-xl"
+        >
+          📚
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-gray-500">Filières</h4>
+          <p class="text-2xl font-bold text-gray-800">{{ statistics.stagesByFiliere.length }}</p>
+          <small class="text-xs text-gray-400">Formations actives</small>
+        </div>
+      </div>
+
+      <div class="card p-4 flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xl"
+        >
+          📈
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-gray-500">Taux Validation</h4>
+          <p class="text-2xl font-bold text-gray-800">{{ getValidationRate() }}%</p>
+          <small class="text-xs text-gray-400">Stages validés</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Stages by State -->
+      <div class="card">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-800">Stages par État</h3>
+            <span class="text-sm text-gray-400">Répartition</span>
+          </div>
+        </div>
+        <div class="p-6 space-y-4">
+          <div *ngFor="let stat of statistics.stagesByState" class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="px-3 py-1 rounded-full text-xs font-medium text-white"
+                [style.backgroundColor]="getStateColor(stat.state)"
+              >
+                {{ getStateLabel(stat.state) }}
+              </span>
+              <span class="text-sm text-gray-600">{{ stat.count }} stage(s)</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                [style.width.%]="stat.percentage"
+                [style.backgroundColor]="getStateColor(stat.state)"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stages by Filiere -->
+      <div class="card">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex flex-col">
+            <h3 class="text-lg font-semibold text-gray-800">Répartition par filière</h3>
+            <span class="text-sm text-gray-400">Nombre de stages par formation</span>
+          </div>
+        </div>
+        <div class="p-6 space-y-4">
+          <div *ngFor="let filiere of statistics.stagesByFiliere" class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-700">{{ filiere.filiereName }}</span>
+              <span class="text-sm text-gray-500">{{ filiere.count }} stage(s)</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div
+                class="h-full rounded-full bg-green-500 transition-all duration-500"
+                [style.width.%]="getFilierePercentage(filiere.count)"
+              ></div>
+            </div>
+          </div>
+          <div
+            *ngIf="!statistics.stagesByFiliere || statistics.stagesByFiliere.length === 0"
+            class="text-center text-gray-400 py-8"
+          >
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

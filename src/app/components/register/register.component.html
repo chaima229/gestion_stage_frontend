@@ -1,0 +1,216 @@
+<div class="flex min-h-screen bg-white">
+  <!-- Left Section -->
+  <div
+    class="flex-1 bg-gradient-to-br from-[#1a2a4a] to-[#0f1a2e] text-white p-8 flex items-center justify-center relative overflow-hidden"
+  >
+    <!-- Decorative circles -->
+    <div
+      class="absolute w-[500px] h-[500px] bg-[rgba(102,126,234,0.1)] rounded-full -top-[200px] -right-[200px]"
+    ></div>
+    <div
+      class="absolute w-[300px] h-[300px] bg-[rgba(118,75,162,0.1)] rounded-full -bottom-[150px] -left-[150px]"
+    ></div>
+
+    <div class="relative z-10 max-w-[450px]">
+      <!-- Logo -->
+      <div class="flex items-center gap-4 mb-12">
+        <div
+          class="w-[50px] h-[50px] gradient-primary rounded-xl flex items-center justify-center text-3xl shadow-lg shadow-primary/30"
+        >
+          🎓
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold m-0">StageHub</h2>
+          <p class="text-sm opacity-70 m-0">Gestion des stages</p>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="mb-12">
+        <h1 class="text-4xl font-bold leading-tight mb-4">Rejoignez notre<br />communauté</h1>
+        <p class="text-base opacity-80 leading-relaxed">
+          Accédez à une plateforme complète pour gérer et suivre tous les stages de votre
+          établissement en un seul endroit.
+        </p>
+
+        <!-- Benefits -->
+        <div class="mt-8 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">✨</span>
+            <span class="opacity-90">Interface intuitive et facile à utiliser</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xl">⚡</span>
+            <span class="opacity-90">Suivi en temps réel des stages</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🔒</span>
+            <span class="opacity-90">Sécurité et confidentialité garanties</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm opacity-50 absolute bottom-8 left-8">
+        © 2024 StageHub. Tous droits réservés.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex-1 bg-[#f8f9fa] p-8 flex items-center justify-center overflow-y-auto">
+    <div class="w-full max-w-[420px] py-4">
+      <!-- Header -->
+      <div class="mb-6">
+        <h2 class="text-3xl font-bold text-[#1a2a4a] m-0">Inscription</h2>
+        <p class="text-[#718096] mt-2">Créez votre compte pour commencer</p>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="alert alert-error mb-6">
+        {{ errorMessage() }}
+      </div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- Email Input -->
+        <div class="mb-4">
+          <label for="email" class="block font-semibold text-[#1a2a4a] mb-2 text-sm">Email</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-lg pointer-events-none">✉️</span>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+              placeholder="vous&#64;example.fr"
+            />
+          </div>
+          <p
+            *ngIf="email?.invalid && (email?.dirty || submitted)"
+            class="text-red-500 text-xs mt-1"
+          >
+            <span *ngIf="email?.errors?.['required']">L'email est requis</span>
+            <span *ngIf="email?.errors?.['email']">Email invalide</span>
+          </p>
+        </div>
+
+        <!-- Name Row -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <!-- First Name Input -->
+          <div>
+            <label for="firstName" class="block font-semibold text-[#1a2a4a] mb-2 text-sm"
+              >Prénom</label
+            >
+            <div class="relative flex items-center">
+              <span class="absolute left-4 text-lg pointer-events-none">👤</span>
+              <input
+                type="text"
+                id="firstName"
+                formControlName="firstName"
+                class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+                placeholder="Jean"
+              />
+            </div>
+            <p
+              *ngIf="firstName?.invalid && (firstName?.dirty || submitted)"
+              class="text-red-500 text-xs mt-1"
+            >
+              <span *ngIf="firstName?.errors?.['required']">Requis</span>
+              <span *ngIf="firstName?.errors?.['minlength']">Min 2 caractères</span>
+            </p>
+          </div>
+
+          <!-- Last Name Input -->
+          <div>
+            <label for="lastName" class="block font-semibold text-[#1a2a4a] mb-2 text-sm"
+              >Nom</label
+            >
+            <div class="relative flex items-center">
+              <span class="absolute left-4 text-lg pointer-events-none">👤</span>
+              <input
+                type="text"
+                id="lastName"
+                formControlName="lastName"
+                class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+                placeholder="Dupont"
+              />
+            </div>
+            <p
+              *ngIf="lastName?.invalid && (lastName?.dirty || submitted)"
+              class="text-red-500 text-xs mt-1"
+            >
+              <span *ngIf="lastName?.errors?.['required']">Requis</span>
+              <span *ngIf="lastName?.errors?.['minlength']">Min 2 caractères</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Password Input -->
+        <div class="mb-4">
+          <label for="password" class="block font-semibold text-[#1a2a4a] mb-2 text-sm"
+            >Mot de passe</label
+          >
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-lg pointer-events-none">🔒</span>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+              placeholder="••••••••"
+            />
+          </div>
+          <p
+            *ngIf="password?.invalid && (password?.dirty || submitted)"
+            class="text-red-500 text-xs mt-1"
+          >
+            <span *ngIf="password?.errors?.['required']">Le mot de passe est requis</span>
+            <span *ngIf="password?.errors?.['minlength']">Minimum 6 caractères</span>
+          </p>
+        </div>
+
+        <!-- Confirm Password Input -->
+        <div class="mb-6">
+          <label for="confirmPassword" class="block font-semibold text-[#1a2a4a] mb-2 text-sm"
+            >Confirmer le mot de passe</label
+          >
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-lg pointer-events-none">🔒</span>
+            <input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+              placeholder="••••••••"
+            />
+          </div>
+          <p
+            *ngIf="(confirmPassword?.dirty || submitted) && registerForm.errors?.['passwordMismatch']"
+            class="text-red-500 text-xs mt-1"
+          >
+            Les mots de passe ne correspondent pas
+          </p>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          [disabled]="isLoading()"
+          class="w-full py-3 px-6 gradient-primary text-white font-semibold rounded-xl text-base cursor-pointer transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          <span *ngIf="!isLoading()">S'inscrire →</span>
+          <span *ngIf="isLoading()">Inscription en cours...</span>
+        </button>
+      </form>
+
+      <!-- Login Link -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-[#718096]">
+          Vous avez déjà un compte?
+          <a routerLink="/login" class="text-[#667eea] font-semibold hover:underline"
+            >Se connecter</a
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,177 @@
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  /* Reduce heading sizes on mobile */
+  h1 {
+    font-size: 1.25rem !important; /* ~20px instead of 1.5rem/24px */
+  }
+
+  h2 {
+    font-size: 1.125rem !important; /* ~18px */
+  }
+
+  h3 {
+    font-size: 1rem !important; /* ~16px */
+  }
+
+  /* Reduce padding on mobile */
+  .p-6 {
+    padding: 1rem !important;
+  }
+
+  /* Stack buttons vertically on small screens */
+  .flex-wrap {
+    flex-direction: column;
+  }
+
+  /* Reduce tab padding */
+  .px-6 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .py-3 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  /* Make table scrollable horizontally */
+  .overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Reduce table cell padding */
+  td,
+  th {
+    padding: 0.5rem !important;
+    font-size: 0.813rem !important; /* ~13px */
+  }
+
+  /* Reduce badge sizes */
+  .badge {
+    font-size: 0.688rem !important; /* ~11px */
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  /* Reduce button sizes */
+  .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.813rem !important;
+  }
+
+  /* Smaller action buttons */
+  .w-9 {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .h-9 {
+    height: 2rem !important;
+  }
+
+  /* Modal adjustments */
+  .max-w-2xl {
+    max-width: 95vw !important;
+  }
+
+  .max-w-3xl {
+    max-width: 95vw !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) {
+  h1 {
+    font-size: 1.375rem !important; /* ~22px */
+  }
+
+  .p-6 {
+    padding: 1.25rem !important;
+  }
+
+  td,
+  th {
+    padding: 0.625rem !important;
+    font-size: 0.875rem !important; /* ~14px */
+  }
+}
+
+/* Reduce overall text sizes */
+.text-2xl {
+  font-size: 1.5rem !important; /* 24px instead of default larger */
+}
+
+.text-xl {
+  font-size: 1.25rem !important; /* 20px */
+}
+
+.text-lg {
+  font-size: 1.125rem !important; /* 18px */
+}
+
+/* Make table more compact */
+table {
+  font-size: 0.875rem; /* 14px */
+}
+
+th {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+}
+
+/* Compact badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.625rem;
+}
+
+/* Responsive grid for form */
+.grid {
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Ensure modals are scrollable on small screens */
+.max-h-\[90vh\] {
+  max-height: 90vh;
+}
+
+/* Better mobile form inputs */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 1rem !important; /* Prevent zoom on iOS */
+  }
+
+  label {
+    font-size: 0.813rem !important;
+  }
+}
+
+/* Compact search section */
+@media (max-width: 768px) {
+  .search-section {
+    padding: 1rem;
+  }
+
+  .search-input {
+    font-size: 0.875rem;
+  }
+}
+
+/* Stack flex containers on mobile */
+@media (max-width: 640px) {
+  .sm\:flex-row {
+    flex-direction: column !important;
+  }
+}

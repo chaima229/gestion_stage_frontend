@@ -1,0 +1,355 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header avec salutation -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">
+      Bonjour, {{ currentUser()?.prenom || 'Étudiant' }}!
+    </h1>
+    <p class="text-gray-500 mt-1">Bienvenue sur votre tableau de bord</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+    <div class="spinner"></div>
+    <p class="mt-4 text-gray-500">Chargement des données...</p>
+  </div>
+
+  <!-- Error State -->
+  <div
+    *ngIf="error && !isLoading"
+    class="bg-red-50 border border-red-200 rounded-xl p-6 text-center"
+  >
+    <p class="text-red-600 mb-4">{{ error }}</p>
+    <button
+      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+      (click)="loadStatistics()"
+    >
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading">
+    <!-- Stats Cards Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <!-- Mes stages -->
+      <div class="bg-white rounded-2xl shadow-sm border-l-4 border-blue-500 p-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500 font-medium">Mes stages</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-1">
+              {{ statistics?.totalStages || stages.length }}
+            </h3>
+          </div>
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <svg
+              class="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validés -->
+      <div class="bg-white rounded-2xl shadow-sm border-l-4 border-emerald-500 p-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500 font-medium">Validés</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ getValidatedCount() }}</h3>
+          </div>
+          <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+            <svg
+              class="w-6 h-6 text-emerald-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- En attente -->
+      <div class="bg-white rounded-2xl shadow-sm border-l-4 border-amber-500 p-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500 font-medium">En attente</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ getPendingCount() }}</h3>
+          </div>
+          <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+            <svg
+              class="w-6 h-6 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Refusés -->
+      <div class="bg-white rounded-2xl shadow-sm border-l-4 border-red-500 p-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-500 font-medium">Refusés</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ getRejectedCount() }}</h3>
+          </div>
+          <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Mes propositions de stage (gauche - 2 colonnes) -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div class="p-6 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-800">Mes propositions de stage</h2>
+          </div>
+          <div class="p-6">
+            <!-- Liste des stages -->
+            <div *ngIf="stages.length > 0" class="space-y-4">
+              <div
+                *ngFor="let stage of stages"
+                class="border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                      <h3 class="font-semibold text-gray-800">{{ stage.sujet }}</h3>
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium"
+                        [ngClass]="getStateBgClass(stage.etat)"
+                      >
+                        {{ getStateLabel(stage.etat) }}
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">{{ stage.entreprise }}</p>
+                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                      <span class="flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          ></path>
+                        </svg>
+                        {{ stage.dateDebut | date : 'dd/MM/yyyy' }} -
+                        {{ stage.dateFin | date : 'dd/MM/yyyy' }}
+                      </span>
+                    </div>
+                  </div>
+                  <a
+                    [routerLink]="['/student/stage', stage.id]"
+                    class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Voir détails"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      ></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- État vide -->
+            <div *ngIf="stages.length === 0" class="text-center py-12">
+              <div
+                class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-gray-600 font-medium mb-2">Aucune proposition de stage</h3>
+              <p class="text-gray-400 text-sm mb-4">Commencez par proposer votre premier stage</p>
+              <a
+                routerLink="/student/create-stage"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  ></path>
+                </svg>
+                Proposer un stage
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar droite -->
+      <div class="space-y-6">
+        <!-- Actions rapides -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div class="p-6 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-800">Actions rapides</h2>
+          </div>
+          <div class="p-4 space-y-3">
+            <a
+              routerLink="/student/create-stage"
+              class="flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl text-blue-700 transition-colors"
+            >
+              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  ></path>
+                </svg>
+              </div>
+              <span class="font-medium">Proposer un stage</span>
+            </a>
+            <a
+              routerLink="/student/my-stages"
+              class="flex items-center gap-3 p-3 bg-purple-50 hover:bg-purple-100 rounded-xl text-purple-700 transition-colors"
+            >
+              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  ></path>
+                </svg>
+              </div>
+              <span class="font-medium">Voir mes stages</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Processus de validation -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+          <div class="p-6 border-b border-blue-100">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              Processus de validation
+            </h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <!-- Étape 1 -->
+              <div class="flex gap-4">
+                <div class="flex flex-col items-center">
+                  <div
+                    class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                  >
+                    1
+                  </div>
+                  <div class="w-0.5 h-full bg-blue-200 mt-2"></div>
+                </div>
+                <div class="pb-4">
+                  <h4 class="font-medium text-gray-800">Proposition</h4>
+                  <p class="text-sm text-gray-500">
+                    Soumettez votre proposition de stage avec tous les détails requis.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Étape 2 -->
+              <div class="flex gap-4">
+                <div class="flex flex-col items-center">
+                  <div
+                    class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                  >
+                    2
+                  </div>
+                  <div class="w-0.5 h-full bg-blue-200 mt-2"></div>
+                </div>
+                <div class="pb-4">
+                  <h4 class="font-medium text-gray-800">Examen</h4>
+                  <p class="text-sm text-gray-500">
+                    Votre encadrant examine et évalue votre proposition.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Étape 3 -->
+              <div class="flex gap-4">
+                <div class="flex flex-col items-center">
+                  <div
+                    class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                  >
+                    3
+                  </div>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-800">Décision</h4>
+                  <p class="text-sm text-gray-500">
+                    Votre stage est validé ou des modifications sont demandées.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

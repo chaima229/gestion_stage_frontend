@@ -1,0 +1,381 @@
+<div class="p-6">
+  <!-- Page Subtitle -->
+  <div class="mb-6">
+    <p class="text-gray-500 text-sm">Voici un aperçu de l'activité des stages</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading">
+    <div class="text-center p-12 bg-white rounded-xl shadow-sm">
+      <div class="spinner mx-auto mb-4"></div>
+      <p class="text-[#666]">Chargement des statistiques...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading">
+    <div class="alert alert-error">
+      <p>{{ error }}</p>
+      <button class="btn btn-primary mt-4" (click)="loadStatistics()">Réessayer</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="statistics && !isLoading">
+    <!-- Primary Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+      <div class="card p-6 flex items-center gap-4 bg-white">
+        <div class="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+          <app-icon name="calendar" [size]="28"></app-icon>
+        </div>
+        <div>
+          <p class="text-sm text-[#64748b] m-0">Total Stages</p>
+          <h3 class="text-3xl font-bold text-[#1a1a2e] m-0">{{ statistics.totalStages }}</h3>
+        </div>
+      </div>
+
+      <div class="card p-6 flex items-center gap-4 bg-green-50">
+        <div
+          class="w-14 h-14 rounded-xl bg-green-100 flex items-center justify-center text-green-600"
+        >
+          <app-icon name="checkCircle" [size]="28"></app-icon>
+        </div>
+        <div>
+          <p class="text-sm text-[#64748b] m-0">Validés</p>
+          <h3 class="text-3xl font-bold text-green-700 m-0">{{ getValidatedCount() }}</h3>
+          <span class="text-xs text-green-600"
+            >{{
+              statistics.totalStages > 0
+                ? ((getValidatedCount() / statistics.totalStages) * 100).toFixed(1)
+                : 0
+            }}% du total</span
+          >
+        </div>
+      </div>
+
+      <div class="card p-6 flex items-center gap-4 bg-amber-50">
+        <div
+          class="w-14 h-14 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600"
+        >
+          <app-icon name="clock" [size]="28"></app-icon>
+        </div>
+        <div>
+          <p class="text-sm text-[#64748b] m-0">En attente</p>
+          <h3 class="text-3xl font-bold text-amber-700 m-0">{{ getPendingCount() }}</h3>
+          <span class="text-xs text-amber-600"
+            >{{
+              statistics.totalStages > 0
+                ? ((getPendingCount() / statistics.totalStages) * 100).toFixed(1)
+                : 0
+            }}% du total</span
+          >
+        </div>
+      </div>
+
+      <div class="card p-6 flex items-center gap-4 bg-red-50">
+        <div class="w-14 h-14 rounded-xl bg-red-100 flex items-center justify-center text-red-600">
+          <app-icon name="xCircle" [size]="28"></app-icon>
+        </div>
+        <div>
+          <p class="text-sm text-[#64748b] m-0">Refusés</p>
+          <h3 class="text-3xl font-bold text-red-700 m-0">{{ getRejectedCount() }}</h3>
+          <span class="text-xs text-red-600"
+            >{{
+              statistics.totalStages > 0
+                ? ((getRejectedCount() / statistics.totalStages) * 100).toFixed(1)
+                : 0
+            }}% du total</span
+          >
+        </div>
+      </div>
+
+      <div class="card p-6 flex items-center gap-4 bg-gray-50">
+        <div
+          class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600"
+        >
+          <app-icon name="fileEdit" [size]="28"></app-icon>
+        </div>
+        <div>
+          <p class="text-sm text-[#64748b] m-0">Brouillons</p>
+          <h3 class="text-3xl font-bold text-gray-700 m-0">{{ getDraftCount() }}</h3>
+          <span class="text-xs text-gray-600"
+            >{{
+              statistics.totalStages > 0
+                ? ((getDraftCount() / statistics.totalStages) * 100).toFixed(1)
+                : 0
+            }}% du total</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- Distribution by Status -->
+      <div class="card p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <app-icon name="refreshCw" [size]="20" class="text-[#667eea]"></app-icon>
+          <div>
+            <h3 class="text-lg font-semibold text-[#1a1a2e] m-0">Répartition par état</h3>
+            <p class="text-xs text-[#94a3b8] m-0">Distribution des stages selon leur statut</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+            <span class="flex-1 text-sm text-[#1a1a2e]">Validés</span>
+            <span class="text-sm font-medium text-[#1a1a2e]">{{ getValidatedCount() }}</span>
+            <span class="text-sm text-[#64748b]"
+              >({{
+                statistics.totalStages > 0
+                  ? ((getValidatedCount() / statistics.totalStages) * 100).toFixed(1)
+                  : 0
+              }}%)</span
+            >
+          </div>
+          <div class="progress h-2">
+            <div
+              class="progress-bar bg-green-500"
+              [style.width.%]="
+                statistics.totalStages > 0
+                  ? (getValidatedCount() / statistics.totalStages) * 100
+                  : 0
+              "
+            ></div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+            <span class="flex-1 text-sm text-[#1a1a2e]">En attente</span>
+            <span class="text-sm font-medium text-[#1a1a2e]">{{ getPendingCount() }}</span>
+            <span class="text-sm text-[#64748b]"
+              >({{
+                statistics.totalStages > 0
+                  ? ((getPendingCount() / statistics.totalStages) * 100).toFixed(1)
+                  : 0
+              }}%)</span
+            >
+          </div>
+          <div class="progress h-2">
+            <div
+              class="progress-bar bg-amber-500"
+              [style.width.%]="
+                statistics.totalStages > 0 ? (getPendingCount() / statistics.totalStages) * 100 : 0
+              "
+            ></div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <span class="flex-1 text-sm text-[#1a1a2e]">Refusés</span>
+            <span class="text-sm font-medium text-[#1a1a2e]">{{ getRejectedCount() }}</span>
+            <span class="text-sm text-[#64748b]"
+              >({{
+                statistics.totalStages > 0
+                  ? ((getRejectedCount() / statistics.totalStages) * 100).toFixed(1)
+                  : 0
+              }}%)</span
+            >
+          </div>
+          <div class="progress h-2">
+            <div
+              class="progress-bar bg-red-500"
+              [style.width.%]="
+                statistics.totalStages > 0 ? (getRejectedCount() / statistics.totalStages) * 100 : 0
+              "
+            ></div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-gray-400"></div>
+            <span class="flex-1 text-sm text-[#1a1a2e]">Brouillons</span>
+            <span class="text-sm font-medium text-[#1a1a2e]">{{ getDraftCount() }}</span>
+            <span class="text-sm text-[#64748b]"
+              >({{
+                statistics.totalStages > 0
+                  ? ((getDraftCount() / statistics.totalStages) * 100).toFixed(1)
+                  : 0
+              }}%)</span
+            >
+          </div>
+          <div class="progress h-2">
+            <div
+              class="progress-bar bg-gray-400"
+              [style.width.%]="
+                statistics.totalStages > 0 ? (getDraftCount() / statistics.totalStages) * 100 : 0
+              "
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribution by Filiere -->
+      <div class="card p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <app-icon name="building" [size]="20" class="text-[#667eea]"></app-icon>
+          <div>
+            <h3 class="text-lg font-semibold text-[#1a1a2e] m-0">Stages par filière</h3>
+            <p class="text-xs text-[#94a3b8] m-0">Répartition des stages selon les formations</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div *ngFor="let filiere of getStagesByFiliere()" class="flex items-center gap-3">
+            <span class="flex-1 text-sm font-medium text-[#1a1a2e]">{{ filiere.filiereName }}</span>
+            <div class="w-32 progress h-2">
+              <div
+                class="progress-bar bg-[#667eea]"
+                [style.width.%]="
+                  statistics && statistics.totalStages > 0
+                    ? (filiere.count / statistics.totalStages) * 100
+                    : 0
+                "
+              ></div>
+            </div>
+            <span class="text-sm text-[#64748b] w-20 text-right">{{ filiere.count }} stage(s)</span>
+          </div>
+          <div *ngIf="getStagesByFiliere().length === 0" class="text-center text-[#94a3b8] py-4">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div class="card p-6 flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-xl bg-[#e0e7ff] flex items-center justify-center text-[#667eea]"
+        >
+          <app-icon name="fileEdit" [size]="24"></app-icon>
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-[#64748b] m-0">Brouillons</h4>
+          <p class="text-2xl font-bold text-[#1a1a2e] m-0">{{ getDraftCount() }}</p>
+          <small class="text-xs text-[#94a3b8]">Stages en cours de rédaction</small>
+        </div>
+      </div>
+
+      <div class="card p-6 flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-xl bg-[#dcfce7] flex items-center justify-center text-green-600"
+        >
+          <app-icon name="users" [size]="24"></app-icon>
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-[#64748b] m-0">Utilisateurs</h4>
+          <p class="text-2xl font-bold text-[#1a1a2e] m-0">
+            {{ statistics.nombreEtudiants + statistics.nombreEnseignants }}
+          </p>
+          <small class="text-xs text-[#94a3b8]"
+            >{{ statistics.nombreEtudiants }} étudiants,
+            {{ statistics.nombreEnseignants }} enseignants</small
+          >
+        </div>
+      </div>
+
+      <div class="card p-6 flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-xl bg-[#fef3c7] flex items-center justify-center text-amber-600"
+        >
+          <app-icon name="bookOpen" [size]="24"></app-icon>
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-[#64748b] m-0">Filières</h4>
+          <p class="text-2xl font-bold text-[#1a1a2e] m-0">{{ statistics.nombreFilierEs }}</p>
+          <small class="text-xs text-[#94a3b8]">Formations actives</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Recent Stages -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-[#1a1a2e] m-0">Stages récents</h3>
+            <p class="text-xs text-[#94a3b8] m-0">Les dernières propositions</p>
+          </div>
+          <a href="#" class="text-sm text-[#667eea] hover:underline">Voir tout</a>
+        </div>
+        <div class="space-y-3">
+          <div
+            *ngFor="let stage of getRecentStages()"
+            class="flex items-center justify-between p-3 rounded-lg bg-[#f8fafc] hover:bg-[#f1f5f9] transition-all"
+          >
+            <div>
+              <h5 class="text-sm font-medium text-[#1a1a2e] m-0">{{ stage.title }}</h5>
+              <p class="text-xs text-[#64748b] m-0">{{ stage.company }}</p>
+            </div>
+            <span
+              class="badge"
+              [ngClass]="{
+                'badge-success': stage.status === 'VALIDE',
+                'badge-warning': stage.status === 'EN_ATTENTE',
+                'badge-error': stage.status === 'REFUSE',
+                'badge-neutral': stage.status === 'BROUILLON'
+              }"
+            >
+              {{ stage.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distribution by Filiere -->
+      <div class="card p-6">
+        <h3 class="text-lg font-semibold text-[#1a1a2e] mb-1">Répartition par filière</h3>
+        <p class="text-xs text-[#94a3b8] mb-4">Nombre de stages par formation</p>
+        <div class="space-y-4">
+          <div *ngFor="let filiere of getStagesByFiliere()" class="space-y-1">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-[#1a1a2e]">{{ filiere.filiereName }}</span>
+              <span class="text-[#64748b]">{{ filiere.count }} stage(s)</span>
+            </div>
+            <div class="progress">
+              <div
+                class="progress-bar"
+                [style.width.%]="
+                  statistics && statistics.totalStages > 0
+                    ? (filiere.count / statistics.totalStages) * 100
+                    : 0
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 5 Entreprises -->
+      <div class="card p-6">
+        <h3 class="text-lg font-semibold text-[#1a1a2e] mb-1">Top 5 Entreprises</h3>
+        <p class="text-xs text-[#94a3b8] mb-4">Entreprises avec le plus de stages</p>
+        <div class="space-y-3">
+          <div
+            *ngFor="let entreprise of getTopEntreprises(); let i = index"
+            class="flex items-center gap-3"
+          >
+            <div
+              class="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold"
+            >
+              {{ i + 1 }}
+            </div>
+            <div class="flex-1">
+              <div class="text-sm font-medium text-[#1a1a2e]">{{ entreprise.name }}</div>
+              <div class="progress mt-1">
+                <div
+                  class="progress-bar"
+                  [style.width.%]="getEntreprisePercentage(entreprise.count)"
+                ></div>
+              </div>
+            </div>
+            <span class="text-sm text-[#64748b]">{{ entreprise.count }}</span>
+          </div>
+          <div *ngIf="getTopEntreprises().length === 0" class="text-center text-[#94a3b8] py-4">
+            Aucune donnée disponible
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

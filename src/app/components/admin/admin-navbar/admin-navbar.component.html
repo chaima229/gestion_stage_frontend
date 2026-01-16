@@ -1,0 +1,33 @@
+<header class="h-16 bg-[#f5f7fa] flex items-center justify-between px-6">
+  <!-- Left Section - Greeting -->
+  <div>
+    <h2 class="text-lg font-semibold text-[#1a1a2e] m-0">
+      Bonjour, {{ currentUser()?.prenom || 'System' }} !
+    </h2>
+    <p class="text-sm text-gray-500 m-0">Voici un aperçu de l'activité des stages</p>
+  </div>
+
+  <!-- Right Section - Search and Notifications -->
+  <div class="flex items-center gap-4">
+    <!-- Search Bar -->
+    <div class="flex items-center gap-2 bg-[#f1f5f9] px-4 py-2.5 rounded-full min-w-[220px]">
+      <app-icon name="search" [size]="18" class="text-gray-400"></app-icon>
+      <input
+        type="text"
+        placeholder="Rechercher..."
+        class="border-none bg-transparent outline-none flex-1 text-sm text-[#333] placeholder:text-gray-400"
+      />
+    </div>
+
+    <!-- Notifications -->
+    <button
+      class="w-10 h-10 rounded-full bg-transparent border-none cursor-pointer flex items-center justify-center transition-all duration-200 relative text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+      title="Notifications"
+    >
+      <app-icon name="bell" [size]="22"></app-icon>
+      <span
+        class="absolute top-1 right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#f5f7fa]"
+      ></span>
+    </button>
+  </div>
+</header>

@@ -1,0 +1,161 @@
+<div class="p-6">
+  <!-- Page Subtitle -->
+  <div class="mb-6">
+    <p class="text-gray-500 text-sm">Gérez les filières de formation</p>
+  </div>
+
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Gestion des Filières</h1>
+    <button class="btn btn-primary" (click)="openForm()">➕ Nouvelle Filière</button>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger mb-6">
+    <p class="flex-1">{{ error }}</p>
+    <button class="text-red-600 hover:text-red-800 transition-colors" (click)="error = null">
+      ✕
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20">
+    <div class="spinner"></div>
+    <p class="mt-4 text-gray-500">Chargement des filières...</p>
+  </div>
+
+  <!-- Form Modal -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="card w-full max-w-lg animate-slide-up">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-800">
+          {{ editingId ? '✏️ Modifier une filière' : '➕ Créer une nouvelle filière' }}
+        </h2>
+        <button
+          class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+          (click)="closeForm()"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="space-y-2">
+          <label for="nom" class="block text-sm font-medium text-gray-700">Nom de la Filière</label>
+          <input
+            type="text"
+            class="input"
+            id="nom"
+            [(ngModel)]="formData.nom"
+            placeholder="ex: Génie Informatique"
+          />
+        </div>
+        <div class="space-y-2">
+          <label for="niveau" class="block text-sm font-medium text-gray-700">Niveau</label>
+          <select class="input" id="niveau" [(ngModel)]="formData.niveau">
+            <option value="M1">M1</option>
+            <option value="M2">M2</option>
+          </select>
+        </div>
+        <div class="space-y-2">
+          <label for="description" class="block text-sm font-medium text-gray-700"
+            >Description</label
+          >
+          <textarea
+            class="input min-h-[100px] resize-none"
+            id="description"
+            rows="3"
+            [(ngModel)]="formData.description"
+            placeholder="Description de la filière"
+          ></textarea>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end gap-3">
+        <button class="btn btn-ghost" (click)="closeForm()">Annuler</button>
+        <button class="btn btn-primary" (click)="saveFiler()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filieres Table -->
+  <div *ngIf="!isLoading && filieres.length > 0" class="card">
+    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-800">📚 Liste des Filières</h3>
+      <span class="badge badge-primary">{{ filieres.length }} filière(s)</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Nom
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Niveau
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Description
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Enseignants
+            </th>
+            <th
+              class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let filiere of filieres" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4">
+              <strong class="text-gray-800">{{ filiere.nom }}</strong>
+            </td>
+            <td class="px-6 py-4">
+              <span class="badge badge-info">{{ filiere.niveau }}</span>
+            </td>
+            <td class="px-6 py-4 text-gray-600">{{ filiere.description || '-' }}</td>
+            <td class="px-6 py-4">
+              <span class="badge badge-secondary">
+                {{ filiere.enseignants?.length || 0 }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition-colors"
+                  (click)="openForm(filiere)"
+                  title="Modifier"
+                >
+                  ✏️
+                </button>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                  (click)="deleteFiliere(filiere.id)"
+                  title="Supprimer"
+                >
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filieres.length === 0" class="card p-12 text-center">
+    <div class="text-6xl mb-4">📚</div>
+    <h3 class="text-xl font-semibold text-gray-800 mb-2">Aucune filière créée</h3>
+    <p class="text-gray-500 mb-6">Commencez par créer une nouvelle filière.</p>
+    <button class="btn btn-primary" (click)="openForm()">➕ Créer une filière</button>
+  </div>
+</div>

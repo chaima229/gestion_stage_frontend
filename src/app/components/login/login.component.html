@@ -1,0 +1,176 @@
+<div class="flex min-h-screen bg-white">
+  <!-- Left Section -->
+  <div
+    class="flex-1 bg-gradient-to-br from-[#1a2a4a] to-[#0f1a2e] text-white p-8 flex items-center justify-center relative overflow-hidden"
+  >
+    <!-- Decorative circles -->
+    <div
+      class="absolute w-[500px] h-[500px] bg-[rgba(102,126,234,0.1)] rounded-full -top-[200px] -right-[200px]"
+    ></div>
+    <div
+      class="absolute w-[300px] h-[300px] bg-[rgba(118,75,162,0.1)] rounded-full -bottom-[150px] -left-[150px]"
+    ></div>
+
+    <div class="relative z-10 max-w-[450px]">
+      <!-- Logo -->
+      <div class="flex items-center gap-4 mb-12">
+        <div
+          class="w-[50px] h-[50px] gradient-primary rounded-xl flex items-center justify-center text-3xl shadow-lg shadow-primary/30"
+        >
+          🎓
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold m-0">StageHub</h2>
+          <p class="text-sm opacity-70 m-0">Gestion des stages</p>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="mb-12">
+        <h1 class="text-4xl font-bold leading-tight mb-4">
+          Gérez vos stages<br />en toute simplicité
+        </h1>
+        <p class="text-base opacity-80 leading-relaxed">
+          Une plateforme complète pour suivre, valider et organiser les stages de votre
+          établissement.
+        </p>
+
+        <!-- Stats -->
+        <div class="flex gap-8 mt-8">
+          <div class="flex-1">
+            <span class="text-3xl font-bold block">500+</span>
+            <span class="text-sm opacity-70">Stages gérés</span>
+          </div>
+          <div class="flex-1">
+            <span class="text-3xl font-bold block">50+</span>
+            <span class="text-sm opacity-70">Entreprises partenaires</span>
+          </div>
+          <div class="flex-1">
+            <span class="text-3xl font-bold block">98%</span>
+            <span class="text-sm opacity-70">Satisfaction</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm opacity-50 absolute bottom-8 left-8">
+        © 2024 StageHub. Tous droits réservés.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Section -->
+  <div class="flex-1 bg-[#f8f9fa] p-8 flex items-center justify-center">
+    <div class="w-full max-w-[420px]">
+      <!-- Header -->
+      <div class="mb-8">
+        <h2 class="text-3xl font-bold text-[#1a2a4a] m-0">Connexion</h2>
+        <p class="text-[#718096] mt-2">Entrez vos identifiants pour accéder à votre espace</p>
+      </div>
+
+      <!-- Session Expired Message -->
+      <div
+        *ngIf="sessionExpiredMessage"
+        class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg mb-6 text-sm"
+      >
+        {{ sessionExpiredMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="alert alert-error mb-6">
+        {{ errorMessage() }}
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Email Input -->
+        <div class="mb-6">
+          <label for="email" class="block font-semibold text-[#1a2a4a] mb-3 text-sm">Email</label>
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-xl pointer-events-none">✉️</span>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+              placeholder="vous&#64;example.fr"
+            />
+          </div>
+          <p
+            *ngIf="email?.invalid && (email?.dirty || submitted)"
+            class="text-red-500 text-xs mt-2"
+          >
+            <span *ngIf="email?.errors?.['required']">L'email est requis</span>
+            <span *ngIf="email?.errors?.['email']">Email invalide</span>
+          </p>
+        </div>
+
+        <!-- Password Input -->
+        <div class="mb-6">
+          <label for="password" class="block font-semibold text-[#1a2a4a] mb-3 text-sm"
+            >Mot de passe</label
+          >
+          <div class="relative flex items-center">
+            <span class="absolute left-4 text-xl pointer-events-none">🔒</span>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              class="w-full pl-12 pr-4 py-3 text-sm border border-[#e2e8f0] rounded-xl bg-white text-[#1a2a4a] transition-all duration-200 focus:outline-none focus:border-[#667eea] focus:ring-4 focus:ring-[#667eea]/20"
+              placeholder="••••••••"
+            />
+          </div>
+          <a href="#" class="text-xs text-[#667eea] hover:underline mt-2 inline-block"
+            >Mot de passe oublié ?</a
+          >
+          <p
+            *ngIf="password?.invalid && (password?.dirty || submitted)"
+            class="text-red-500 text-xs mt-2"
+          >
+            <span *ngIf="password?.errors?.['required']">Le mot de passe est requis</span>
+            <span *ngIf="password?.errors?.['minlength']">Minimum 6 caractères</span>
+          </p>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          [disabled]="isLoading()"
+          class="w-full py-3 px-6 gradient-primary text-white font-semibold rounded-xl text-base cursor-pointer transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          <span *ngIf="!isLoading()">Se connecter →</span>
+          <span *ngIf="isLoading()">Connexion en cours...</span>
+        </button>
+      </form>
+
+      <!-- Demo Accounts -->
+      <div class="mt-8 pt-6 border-t border-[#e2e8f0]">
+        <h3 class="text-sm font-semibold text-[#718096] mb-4 text-center">
+          Comptes de démonstration
+        </h3>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="text-center p-3 bg-white rounded-lg border border-[#e2e8f0]">
+            <div class="text-xs font-semibold text-[#667eea] mb-1">Admin</div>
+            <div class="text-xs text-[#718096] break-all">admin&#64;ecole.fr</div>
+          </div>
+          <div class="text-center p-3 bg-white rounded-lg border border-[#e2e8f0]">
+            <div class="text-xs font-semibold text-[#10b981] mb-1">Enseignant</div>
+            <div class="text-xs text-[#718096] break-all">marie.dupont&#64;ecole.fr</div>
+          </div>
+          <div class="text-center p-3 bg-white rounded-lg border border-[#e2e8f0]">
+            <div class="text-xs font-semibold text-[#3b82f6] mb-1">Étudiant</div>
+            <div class="text-xs text-[#718096] break-all">sophie.bernard&#64;etudiant.ecole.fr</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register Link -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-[#718096]">
+          Pas encore de compte?
+          <a routerLink="/register" class="text-[#667eea] font-semibold hover:underline"
+            >S'inscrire</a
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
