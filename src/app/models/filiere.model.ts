@@ -2,6 +2,9 @@
  * Niveaux d'étude
  */
 export enum NiveauFiliere {
+  B1 = 'B1',
+  B2 = 'B2',
+  B3 = 'B3',
   M1 = 'M1',
   M2 = 'M2',
 }
@@ -15,6 +18,8 @@ export interface Filiere {
   niveau: NiveauFiliere;
   description?: string;
   enseignants?: number[]; // IDs des enseignants associés
+  etudiantsCount?: number; // Nombre d'étudiants dans la filière
+  stagesCount?: number; // Nombre de stages dans la filière
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -24,14 +24,14 @@ export class StudentSettingsComponent implements OnInit {
   profileForm = {
     nom: '',
     prenom: '',
-    email: ''
+    email: '',
   };
 
   // Formulaire mot de passe
   passwordForm = {
     currentPassword: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   };
 
   isLoadingProfile = false;
@@ -72,25 +72,49 @@ export class StudentSettingsComponent implements OnInit {
       return;
     }
 
-    this.userService.updateProfile(userId, {
-      nom: this.profileForm.nom,
-      prenom: this.profileForm.prenom
-    }).subscribe({
-      next: (updatedUser) => {
-        this.profileSuccess = 'Profil mis à jour avec succès';
-        this.isLoadingProfile = false;
-        // Mettre à jour le formulaire avec les nouvelles valeurs
-        if (updatedUser) {
-          this.profileForm.nom = updatedUser.nom || this.profileForm.nom;
-          this.profileForm.prenom = updatedUser.prenom || this.profileForm.prenom;
-        }
-      },
-      error: (err) => {
-        console.error('Erreur lors de la mise à jour du profil:', err);
-        this.profileError = 'Erreur lors de la mise à jour du profil';
-        this.isLoadingProfile = false;
-      }
-    });
+    this.userService
+      .updateProfile(userId, {
+        nom: this.profileForm.nom,
+        prenom: this.profileForm.prenom,
+      })
+      .subscribe({
+        next: (updatedUser) => {
+          this.profileSuccess = 'Profil mis à jour avec succès';
+          this.isLoadingProfile = false;
+          // Mettre à jour le formulaire et le profil local avec les nouvelles valeurs
+          if (updatedUser) {
+            this.profileForm.nom = updatedUser.nom || this.profileForm.nom;
+            this.profileForm.prenom = updatedUser.prenom || this.profileForm.prenom;
+            // Synchroniser le profil local (authService et localStorage)
+            const current = this.currentUser();
+            if (current) {
+              current.nom = updatedUser.nom;
+              current.prenom = updatedUser.prenom;
+              this.authService.currentUser.set({ ...current });
+              if (isPlatformBrowser(this.platformId)) {
+                localStorage.setItem('currentUser', JSON.stringify({ ...current }));
+              }
+            }
+          }
+          setTimeout(() => {
+            this.profileSuccess = null;
+          }, 3000);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la mise à jour du profil:', err);
+          // Si le backend indique SESSION_EXPIRED ou 403, forcer la déconnexion avec message et redirection différée
+          if (err.status === 403 || err.error?.error === 'SESSION_EXPIRED') {
+            this.profileError =
+              err.error?.message || 'Votre session a expiré. Veuillez vous reconnecter.';
+            setTimeout(() => {
+              this.authService.logout();
+            }, 2000);
+          } else {
+            this.profileError = err.error?.message || 'Erreur lors de la mise à jour du profil';
+          }
+          this.isLoadingProfile = false;
+        },
+      });
   }
 
   updatePassword() {
@@ -118,26 +142,31 @@ export class StudentSettingsComponent implements OnInit {
       return;
     }
 
-    this.userService.updatePassword(userId, {
-      currentPassword: this.passwordForm.currentPassword,
-      newPassword: this.passwordForm.newPassword
-    }).subscribe({
-      next: () => {
-        this.passwordSuccess = 'Mot de passe modifié avec succès';
-        this.isLoadingPassword = false;
-        // Réinitialiser le formulaire
-        this.passwordForm = {
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        };
-      },
-      error: (err) => {
-        console.error('Erreur lors du changement de mot de passe:', err);
-        this.passwordError = err.error?.message || 'Erreur lors du changement de mot de passe';
-        this.isLoadingPassword = false;
-      }
-    });
+    this.userService
+      .updatePassword(userId, {
+        currentPassword: this.passwordForm.currentPassword,
+        newPassword: this.passwordForm.newPassword,
+      })
+      .subscribe({
+        next: () => {
+          this.passwordSuccess = 'Mot de passe modifié avec succès';
+          this.isLoadingPassword = false;
+          // Réinitialiser le formulaire
+          this.passwordForm = {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          };
+          setTimeout(() => {
+            this.passwordSuccess = null;
+          }, 3000);
+        },
+        error: (err) => {
+          console.error('Erreur lors du changement de mot de passe:', err);
+          this.passwordError = err.error?.message || 'Erreur lors du changement de mot de passe';
+          this.isLoadingPassword = false;
+        },
+      });
   }
 
   getInitials(): string {

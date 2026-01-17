@@ -40,7 +40,8 @@
     "rxjs": "~7.8.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@angular/build": "^21.0.4",

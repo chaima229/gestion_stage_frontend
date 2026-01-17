@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { DashboardStatistics, StageStateStatistic } from '../../../models/statistics.model';
 import { StatisticsService } from '../../../services/statistics.service';
 import { IconComponent } from '../../../shared/icons/icon.component';
@@ -13,7 +14,7 @@ interface RecentStage {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, RouterModule, IconComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css',
 })
@@ -69,63 +70,68 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getValidatedCount(): number {
-    if (!this.statistics?.stagesByState || !Array.isArray(this.statistics.stagesByState)) return 0;
-    const validated = this.statistics.stagesByState.find((s) => s.state === 'VALIDE');
-    return validated?.count || 0;
+    if (!this.statistics?.stagesByState) return 0;
+    const states = this.statistics.stagesByState;
+    if (Array.isArray(states)) {
+      const validated = states.find((s) => s.state === 'VALIDE');
+      return validated?.count || 0;
+    } else {
+      return states['VALIDE'] ?? 0;
+    }
   }
 
   getPendingCount(): number {
-    if (!this.statistics?.stagesByState || !Array.isArray(this.statistics.stagesByState)) return 0;
-    const pending = this.statistics.stagesByState.find((s) => s.state === 'EN_ATTENTE_VALIDATION');
-    return pending?.count || 0;
+    if (!this.statistics?.stagesByState) return 0;
+    const states = this.statistics.stagesByState;
+    if (Array.isArray(states)) {
+      const pending = states.find((s) => s.state === 'EN_ATTENTE_VALIDATION');
+      return pending?.count || 0;
+    } else {
+      return states['EN_ATTENTE_VALIDATION'] ?? 0;
+    }
   }
 
   getRejectedCount(): number {
-    if (!this.statistics?.stagesByState || !Array.isArray(this.statistics.stagesByState)) return 0;
-    const rejected = this.statistics.stagesByState.find((s) => s.state === 'REFUSE');
-    return rejected?.count || 0;
+    if (!this.statistics?.stagesByState) return 0;
+    const states = this.statistics.stagesByState;
+    if (Array.isArray(states)) {
+      const rejected = states.find((s) => s.state === 'REFUSE');
+      return rejected?.count || 0;
+    } else {
+      return states['REFUSE'] ?? 0;
+    }
   }
 
   getDraftCount(): number {
-    if (!this.statistics?.stagesByState || !Array.isArray(this.statistics.stagesByState)) return 0;
-    const draft = this.statistics.stagesByState.find((s) => s.state === 'BROUILLON');
-    return draft?.count || 0;
+    if (!this.statistics?.stagesByState) return 0;
+    const states = this.statistics.stagesByState;
+    if (Array.isArray(states)) {
+      const draft = states.find((s) => s.state === 'BROUILLON');
+      return draft?.count || 0;
+    } else {
+      return states['BROUILLON'] ?? 0;
+    }
   }
 
   getRecentStages(): RecentStage[] {
     // Mock data for recent stages - replace with real data from API if available
-    return [
-      {
-        title: "Développement d'une application mobile React Native",
-        company: 'Sophie Bernard • TechCorp',
-        status: 'Validé',
-      },
-      {
-        title: "Audit de sécurité d'infrastructure cloud",
-        company: 'Jean Martin • CloudSecure',
-        status: 'En attente',
-      },
-      {
-        title: "Création d'une API REST avec Node.js",
-        company: 'Marie Dupont • WebDev Solutions',
-        status: 'Brouillon',
-      },
-    ];
+    return this.statistics && Array.isArray((this.statistics as any).recentStages)
+      ? (this.statistics as any).recentStages
+      : [];
   }
 
   getStagesByFiliere(): { filiereName: string; count: number }[] {
     if (!this.statistics?.stagesByFiliere) return [];
 
     // Si c'est déjà un tableau, le retourner
-    if (Array.isArray(this.statistics.stagesByFiliere)) {
-      return this.statistics.stagesByFiliere;
+    const filieres = this.statistics.stagesByFiliere;
+    if (Array.isArray(filieres)) {
+      return filieres;
     }
-
     // Si c'est un objet (map), le convertir en tableau
-    const stagesByFiliere = this.statistics.stagesByFiliere as any;
-    return Object.keys(stagesByFiliere).map((key) => ({
+    return Object.keys(filieres).map((key) => ({
       filiereName: key,
-      count: stagesByFiliere[key],
+      count: filieres[key],
     }));
   }
 
@@ -133,19 +139,18 @@ export class AdminDashboardComponent implements OnInit {
     if (!this.statistics?.topEntreprises) return [];
 
     // Si c'est déjà un tableau, le retourner
-    if (Array.isArray(this.statistics.topEntreprises)) {
-      return this.statistics.topEntreprises.map((e: any) => ({
+    const entreprises = this.statistics.topEntreprises;
+    if (Array.isArray(entreprises)) {
+      return entreprises.map((e: any) => ({
         name: e.entreprise || e.name,
         count: e.count,
       }));
     }
-
     // Si c'est un objet (map), le convertir en tableau
-    const topEntreprises = this.statistics.topEntreprises as any;
-    return Object.keys(topEntreprises)
+    return Object.keys(entreprises)
       .map((key) => ({
         name: key,
-        count: topEntreprises[key],
+        count: entreprises[key],
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);

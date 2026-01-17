@@ -37,4 +37,8 @@ export class FiliereService {
   getStages(filiereId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/${filiereId}/stages`);
   }
+
+  importFilieres(filieres: CreateFilierRequest[]): Observable<{ success: number; errors: number }> {
+    return this.http.post<{ success: number; errors: number }>(`${this.baseUrl}/import`, filieres);
+  }
 }

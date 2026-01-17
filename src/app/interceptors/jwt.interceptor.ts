@@ -29,13 +29,11 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Gestion des erreurs 401 et 403 (seulement côté navigateur)
-      if (isPlatformBrowser(platformId) && (error.status === 401 || error.status === 403)) {
-        console.error("Erreur d'authentification:", error.status);
-
+      // Gestion des erreurs 401 uniquement (seulement côté navigateur)
+      if (isPlatformBrowser(platformId) && error.status === 401) {
+        console.error("Erreur d'authentification (401):", error.status);
         // Déconnecter l'utilisateur
         authService.logout();
-
         // Rediriger vers la page de login
         router.navigate(['/login'], {
           queryParams: { reason: 'session-expired' },

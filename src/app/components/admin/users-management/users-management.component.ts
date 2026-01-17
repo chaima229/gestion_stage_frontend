@@ -42,6 +42,10 @@ export class UsersManagementComponent implements OnInit {
   searchNom: string = '';
   activeTab: 'students' | 'teachers' | 'all' = 'students'; // Tab actif par défaut
 
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 5;
+
   UserRole = UserRole;
 
   // Import Excel
@@ -49,6 +53,7 @@ export class UsersManagementComponent implements OnInit {
   showImportModal = false;
   importLoading = false;
   importResult: ImportResult | null = null;
+  Math = Math; // Pour utiliser Math.min dans le template
 
   formData: CreateUserRequest = {
     nom: '',
@@ -106,13 +111,6 @@ export class UsersManagementComponent implements OnInit {
 
   get filteredUsers(): User[] {
     return this.users.filter((user) => {
-      // Filtrer les admins sauf l'admin connecté
-      if (user.role === 'ADMIN' || user.role === 'SOUS_ADMIN') {
-        if (user.id !== this.currentUser()?.id) {
-          return false;
-        }
-      }
-
       const matchRole = !this.searchRole || user.role === this.searchRole;
       const matchNom =
         !this.searchNom ||
@@ -123,15 +121,7 @@ export class UsersManagementComponent implements OnInit {
   }
 
   getFilteredUsers(role: string): User[] {
-    return this.users.filter((user) => {
-      // Filtrer les admins sauf l'admin connecté
-      if (user.role === 'ADMIN' || user.role === 'SOUS_ADMIN') {
-        if (user.id !== this.currentUser()?.id) {
-          return false;
-        }
-      }
-      return user.role === role;
-    });
+    return this.users.filter((user) => user.role === role);
   }
 
   openForm(user?: User) {
@@ -331,5 +321,39 @@ export class UsersManagementComponent implements OnInit {
     link.href = URL.createObjectURL(blob);
     link.download = 'template_utilisateurs.csv';
     link.click();
+  }
+
+  // Pagination
+  get paginatedUsers(): User[] {
+    const filtered = this.filteredUsers;
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return filtered.slice(startIndex, endIndex);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
   }
 }

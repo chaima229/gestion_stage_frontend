@@ -50,6 +50,9 @@ export interface DashboardStatistics {
   nombreFilierEs: number;
   nombreEtudiants: number;
   nombreEnseignants: number;
+  // Champs pour compatibilité avec la réponse API
+  totalTeachers?: number;
+  totalStudents?: number;
 
   // Dates
   generatedAt: Date;

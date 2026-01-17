@@ -278,7 +278,17 @@ export class AuthService {
           }
         }
 
-        const user = JSON.parse(storedUser);
+        let user = JSON.parse(storedUser);
+        // Synchroniser l'ID utilisateur avec celui du token JWT si présent
+        if (tokenData && tokenData.id && user.id !== tokenData.id) {
+          console.warn(
+            'Décalage ID user: localStorage vs token. Correction:',
+            user.id,
+            '->',
+            tokenData.id
+          );
+          user.id = tokenData.id;
+        }
         this.currentUser.set(user);
         this.isAuthenticated.set(true);
         console.log(

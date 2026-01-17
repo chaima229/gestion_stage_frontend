@@ -47,6 +47,11 @@ export class StagesManagementComponent implements OnInit {
   // Recherche textuelle
   searchKeyword = '';
 
+  // Pagination
+  Math = Math;  // Pour utiliser Math.min dans le template
+  currentPage = 1;
+  itemsPerPage = 5;
+
   StageState = StageState;
 
   ngOnInit() {
@@ -253,5 +258,39 @@ export class StagesManagementComponent implements OnInit {
         stage.encadrant?.nom?.toLowerCase().includes(keyword) ||
         stage.encadrant?.prenom?.toLowerCase().includes(keyword)
     );
+  }
+
+  // Pagination
+  get paginatedStages(): StageWithDetails[] {
+    const filtered = this.filteredStages;
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return filtered.slice(startIndex, endIndex);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredStages.length / this.itemsPerPage);
+  }
+
+  get pages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
   }
 }

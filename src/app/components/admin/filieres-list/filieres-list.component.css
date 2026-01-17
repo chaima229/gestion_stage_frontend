@@ -1,1 +1,48 @@
+/* Line clamp pour limiter la description à 2 lignes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
+/* Animations hover pour les cartes */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.25rem !important;
+  }
+
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+
+  .grid {
+    gap: 1rem;
+  }
+}
+
+/* Badge colors */
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.text-blue-700 {
+  color: #1d4ed8;
+}
+
+.bg-purple-100 {
+  background-color: #f3e8ff;
+}
+
+.text-purple-700 {
+  color: #7c3aed;
+}

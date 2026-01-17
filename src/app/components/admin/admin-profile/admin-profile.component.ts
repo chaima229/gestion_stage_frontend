@@ -125,23 +125,39 @@ export class AdminProfileComponent implements OnInit {
     this.error = null;
     this.successMessage = null;
 
-    // TODO: Appeler l'API pour changer le mot de passe
-    // Pour l'instant, simulons un succès
-    setTimeout(() => {
-      this.successMessage = 'Mot de passe modifié avec succès !';
-      this.isChangingPassword = false;
+    const user = this.currentUser();
+    if (!user?.id) {
+      this.error = 'Utilisateur non trouvé';
       this.isLoading = false;
-      this.passwordForm = {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      };
-      this.cdr.detectChanges();
+      return;
+    }
 
-      setTimeout(() => {
-        this.successMessage = null;
-        this.cdr.detectChanges();
-      }, 3000);
-    }, 1000);
+    this.userService
+      .updatePassword(user.id, {
+        currentPassword: this.passwordForm.currentPassword,
+        newPassword: this.passwordForm.newPassword,
+      })
+      .subscribe({
+        next: (res: any) => {
+          this.successMessage = res?.message || 'Mot de passe modifié avec succès !';
+          this.isChangingPassword = false;
+          this.isLoading = false;
+          this.passwordForm = {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          };
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.successMessage = null;
+            this.cdr.detectChanges();
+          }, 3000);
+        },
+        error: (err) => {
+          this.error = err?.error?.message || 'Erreur lors du changement de mot de passe';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 }

@@ -15,7 +15,10 @@ export class TeacherProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private userService = inject(UserService);
 
-  currentUser = this.authService.currentUser();
+  // Utiliser le signal pour toujours avoir l'utilisateur à jour
+  get currentUser() {
+    return this.authService.currentUser();
+  }
   isLoading = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
@@ -34,39 +37,50 @@ export class TeacherProfileComponent implements OnInit {
   };
 
   ngOnInit() {
-    if (this.currentUser) {
-      this.profileForm.nom = this.currentUser.nom;
-      this.profileForm.prenom = this.currentUser.prenom;
+    const user = this.currentUser;
+    if (user) {
+      this.profileForm.nom = user.nom;
+      this.profileForm.prenom = user.prenom;
     }
   }
 
   saveProfile() {
-    if (!this.currentUser?.id) return;
+    const user = this.currentUser;
+    if (!user?.id) return;
 
     this.isLoading = true;
     this.errorMessage = null;
     this.successMessage = null;
 
-    this.userService.updateProfile(this.currentUser.id, this.profileForm).subscribe({
-      next: () => {
+    this.userService.updateProfile(user.id, this.profileForm).subscribe({
+      next: (updatedUser) => {
         this.successMessage = 'Profil mis à jour avec succès';
         this.isLoading = false;
-        // Mettre à jour les données locales
-        if (this.currentUser) {
-          this.currentUser.nom = this.profileForm.nom;
-          this.currentUser.prenom = this.profileForm.prenom;
+        // Mettre à jour les données locales et synchroniser le profil local (authService et localStorage)
+        if (updatedUser) {
+          this.profileForm.nom = updatedUser.nom || this.profileForm.nom;
+          this.profileForm.prenom = updatedUser.prenom || this.profileForm.prenom;
+          if (user) {
+            user.nom = updatedUser.nom;
+            user.prenom = updatedUser.prenom;
+            this.authService.currentUser.set({ ...user });
+            if (typeof window !== 'undefined' && window.localStorage) {
+              localStorage.setItem('currentUser', JSON.stringify({ ...user }));
+            }
+          }
         }
       },
       error: (err) => {
         console.error('Erreur lors de la mise à jour du profil:', err);
-        this.errorMessage = 'Erreur lors de la mise à jour du profil';
+        this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour du profil';
         this.isLoading = false;
       },
     });
   }
 
   changePassword() {
-    if (!this.currentUser?.id) return;
+    const user = this.currentUser;
+    if (!user?.id) return;
 
     if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
       this.errorMessage = 'Les mots de passe ne correspondent pas';
@@ -83,7 +97,7 @@ export class TeacherProfileComponent implements OnInit {
     this.successMessage = null;
 
     this.userService
-      .updatePassword(this.currentUser.id, {
+      .updatePassword(user.id, {
         currentPassword: this.passwordForm.currentPassword,
         newPassword: this.passwordForm.newPassword,
       })
@@ -99,7 +113,15 @@ export class TeacherProfileComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erreur lors du changement de mot de passe:', err);
-          this.errorMessage = err.error?.message || 'Erreur lors du changement de mot de passe';
+          if (err.status === 403 || err.error?.error === 'SESSION_EXPIRED') {
+            this.errorMessage =
+              err.error?.message || 'Votre session a expiré. Veuillez vous reconnecter.';
+            setTimeout(() => {
+              this.authService.logout();
+            }, 2000);
+          } else {
+            this.errorMessage = err.error?.message || 'Erreur lors du changement de mot de passe';
+          }
           this.isLoading = false;
         },
       });
